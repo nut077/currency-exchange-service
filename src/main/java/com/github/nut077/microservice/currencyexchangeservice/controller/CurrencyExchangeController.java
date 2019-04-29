@@ -1,17 +1,31 @@
 package com.github.nut077.microservice.currencyexchangeservice.controller;
 
 import com.github.nut077.microservice.currencyexchangeservice.entity.ExchangeValue;
+import com.github.nut077.microservice.currencyexchangeservice.exception.NotFoundException;
+import com.github.nut077.microservice.currencyexchangeservice.service.ExchangeValueService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.core.env.Environment;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.math.BigDecimal;
+import java.util.Objects;
 
+@RequiredArgsConstructor
 @RestController
 public class CurrencyExchangeController {
 
+    private final Environment environment;
+    private final ExchangeValueService exchangeValueService;
+
     @GetMapping("/currency-exchange/from/{from}/to/{to}")
-    public ExchangeValue retrieveExchangeValue(@PathVariable String from, @PathVariable String to) {
-        return new ExchangeValue(1L, from, to, BigDecimal.valueOf(65));
+    public ResponseEntity<ExchangeValue> retrieveExchangeValue(@PathVariable String from, @PathVariable String to) {
+        ExchangeValue exchangeValue = exchangeValueService.exchangeValue(from, to);
+        if (exchangeValue == null) {
+            throw new NotFoundException("can't find from: " + from + " and to: " + to);
+        }
+        exchangeValue.setPort(Integer.parseInt(Objects.requireNonNull(environment.getProperty("local.server.port"))));
+        return ResponseEntity.ok(exchangeValue);
     }
 }
