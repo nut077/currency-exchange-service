@@ -4,6 +4,7 @@ import com.github.nut077.microservice.currencyexchangeservice.entity.ExchangeVal
 import com.github.nut077.microservice.currencyexchangeservice.exception.NotFoundException;
 import com.github.nut077.microservice.currencyexchangeservice.service.ExchangeValueService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.core.env.Environment;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Objects;
 
+@Log4j2
 @RequiredArgsConstructor
 @RestController
 public class CurrencyExchangeController {
@@ -26,6 +28,7 @@ public class CurrencyExchangeController {
             throw new NotFoundException("can't find from: " + from + " and to: " + to);
         }
         exchangeValue.setPort(Integer.parseInt(Objects.requireNonNull(environment.getProperty("local.server.port"))));
+        log.info("{}", exchangeValue);
         return ResponseEntity.ok(exchangeValue);
     }
 }
